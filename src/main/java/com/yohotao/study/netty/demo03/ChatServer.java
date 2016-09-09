@@ -47,7 +47,7 @@ public class ChatServer {
 		return new ChatServerInitializer(group);
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		final ChatServer server = new ChatServer();
 		ChannelFuture f = server.start(new InetSocketAddress(7048));
 		Runtime.getRuntime().addShutdownHook(new Thread(){

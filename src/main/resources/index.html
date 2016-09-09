@@ -10,7 +10,8 @@
 			window.WebSocket = window.MozWebSocket;
 		}
 		if (window.WebSocket) {
-			socket = new WebSocket("ws://localhost:7048/ws");
+			var isHTTPS = 'https:' == document.location.protocol? true : false;
+			socket = new WebSocket((isHTTPS? "wss":"ws")+"://localhost:7048/ws");
 			socket.onmessage = function(event) {
 				var ta = document.getElementById('responseText');
 				ta.value = ta.value + '\n' + event.data;

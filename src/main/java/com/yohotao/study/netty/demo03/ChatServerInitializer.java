@@ -27,11 +27,11 @@ public class ChatServerInitializer extends ChannelInitializer<Channel> {
 		ChannelPipeline pipeline = ch.pipeline();
 		//编解码http请求
 		pipeline.addLast(new HttpServerCodec());
-		//写文件内容
-		pipeline.addLast(new ChunkedWriteHandler());
 		//聚合解码HttpRequest/HttpContent/LastHttpContent到FullHttpRequest
 		//保证接收的Http请求的完整性
 		pipeline.addLast(new HttpObjectAggregator(64 *1024));
+		//写文件内容
+		pipeline.addLast(new ChunkedWriteHandler());
 		//处理FullHttpRequest
 		pipeline.addLast(new HttpRequestHandler("/ws"));
 		//处理其他的WebSocketFrame
