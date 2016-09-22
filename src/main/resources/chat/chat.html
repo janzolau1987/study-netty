@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>:聊天室::</title>
+<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+<style type="text/css">
+input {
+	width: 50px;
+	height: 55px;
+}
+</style>
+</head>
+<body>
+	<script type="text/javascript">
+		var socket;
+		if (!window.WebSocket) {
+			window.WebSocket = window.MozWebSocket;
+		}
+		if (window.WebSocket) {
+			var isHTTPS = 'https:' == document.location.protocol ? true : false;
+			socket = new WebSocket((isHTTPS ? "wss" : "ws")
+					+ "://172.16.9.7:8888/ws");
+			socket.onmessage = function(event) {
+				var ta = document.getElementById('responseText');
+				var message = event.data;
+				if (message.substring(0, 5) == 'Users') {
+					var fromUser = $("#fromUser").val();
+					var userObj = $.parseJSON(message.substring(6));
+					$("#toUser").empty();
+					$("#toUser").append("<option value=\"all\">所有人</option>");
+					for (var i = 0; i < userObj.users.length; i++) {
+						if(fromUser!=userObj.users[i])
+							$("#toUser").append("<option value=\""+userObj.users[i]+"\">" + userObj.users[i] + "</option>");
+					}
+				}
+				else if(message.substring(0, 11) == 'CurrentUser'){
+					$("#fromUser").val(message.substring(12));
+				} 
+				else if(message != 'Heartbeat') {
+					ta.value = ta.value + '\n' + event.data;
+				}
+			};
+			socket.onopen = function(event) {
+				var ta = document.getElementById('responseText');
+				ta.value = "WebSocket opened.";
+			};
+			socket.onclose = function(event) {
+				var ta = document.getElementById('responseText');
+				ta.value = "WebSocket closed.";
+			};
+		} else {
+			alert("Your browser does not support WebSocket")
+		}
+
+		function send(message) {
+			if (!window.WebSocket)
+				return;
+			if (socket.readyState == WebSocket.OPEN) {
+				var fromUser = $("#fromUser").val();
+				var toUser = $("#toUser").val();
+				socket.send(fromUser + ":" + toUser + ":" + message);
+			} else {
+				alert("The socket is not open");
+			}
+		}
+	</script>
+	<form onsubmit="return false;">
+		<h3>聊天室</h3>
+		<input type="hidden" id="fromUser" name="fromUser" />
+		<table border="0">
+			<tr>
+				<td colspan="2"><textarea id="responseText"
+						style="width: 500px; height: 300px;"></textarea></td>
+			</tr>
+			<tr>
+				<td colspan="2">我对 <select id="toUser" name="toUser">
+						<option value="all">所有人</option>
+				</select> 说：
+				</td>
+			</tr>
+			<tr>
+				<td><textarea id="message" name="message" style="width: 450px; height: 50px;"></textarea></td>
+				<td><input type="button" value="发送"
+					onclick="send(this.form.message.value)"></td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>
